@@ -151,14 +151,14 @@ async function sendPaymentNotification(paymentData) {
 // SERVIDOR HTTP
 // ============================================
 const server = http.createServer(async (req, res) => {
-  // CORS headers - Configuración para producción
-  const allowedOrigins = process.env.NODE_ENV === 'production'
-    ? [
-        'https://web2.uniquemotors.mx',
-        'https://www.paypal.com',
-        'https://sandbox.paypal.com'
-      ]
-    : ['http://localhost:5173', 'http://localhost:3000'];
+  // CORS headers - Configuración para producción y desarrollo
+  const allowedOrigins = [
+    'https://web2.uniquemotors.mx',
+    'https://www.paypal.com',
+    'https://sandbox.paypal.com',
+    'http://localhost:5173',
+    'http://localhost:3000'
+  ];
 
   const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
