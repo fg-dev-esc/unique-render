@@ -351,17 +351,90 @@ const server = http.createServer(async (req, res) => {
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
       console.log('📩 Webhook recibido de PayPal');
       console.log('Tipo de evento:', body.event_type);
-      console.log('Datos:', JSON.stringify(body, null, 2));
       console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-      // Guardar evento en Supabase (opcional)
-      if (body.resource && body.resource.id) {
-        await supabase
+      // Procesar eventos de PayPal
+      const eventType = body.event_type;
+      const resource = body.resource;
+
+      // Buscar el order_id dependiendo del tipo de evento
+      let orderID = null;
+
+      if (resource) {
+        // Para eventos de capture
+        if (resource.id && eventType.includes('CAPTURE')) {
+          orderID = resource.supplementary_data?.related_ids?.order_id || null;
+        }
+        // Para eventos de order
+        else if (resource.id && eventType.includes('ORDER')) {
+          orderID = resource.id;
+        }
+      }
+
+      console.log('🔍 Order ID extraído:', orderID);
+
+      if (orderID) {
+        // Buscar el pago en la base de datos
+        const { data: existingPayment } = await supabase
           .from('paypal_payments')
-          .update({
-            paypal_response: body
-          })
-          .eq('paypal_order_id', body.resource.id);
+          .select('*')
+          .eq('paypal_order_id', orderID)
+          .single();
+
+        if (existingPayment) {
+          console.log('✅ Pago encontrado en DB, actualizando...');
+
+          // Actualizar según el tipo de evento
+          let updateData = {
+            paypal_response: body // Guardar el evento completo
+          };
+
+          switch (eventType) {
+            case 'PAYMENT.CAPTURE.COMPLETED':
+              updateData.status = 'COMPLETED';
+              console.log('💰 Pago completado');
+              break;
+
+            case 'PAYMENT.CAPTURE.DENIED':
+              updateData.status = 'FAILED';
+              console.log('❌ Pago denegado');
+              break;
+
+            case 'PAYMENT.CAPTURE.REFUNDED':
+              updateData.status = 'REFUNDED';
+              console.log('💸 Pago reembolsado');
+              break;
+
+            case 'CHECKOUT.ORDER.APPROVED':
+              updateData.status = 'APPROVED';
+              console.log('✅ Orden aprobada');
+              break;
+
+            case 'CHECKOUT.ORDER.COMPLETED':
+              updateData.status = 'COMPLETED';
+              console.log('✅ Orden completada');
+              break;
+
+            default:
+              console.log('ℹ️ Evento recibido pero sin acción específica');
+          }
+
+          // Actualizar en Supabase
+          const { error } = await supabase
+            .from('paypal_payments')
+            .update(updateData)
+            .eq('paypal_order_id', orderID);
+
+          if (error) {
+            console.error('❌ Error actualizando Supabase:', error);
+          } else {
+            console.log('✅ Supabase actualizado correctamente');
+          }
+        } else {
+          console.log('⚠️ Pago no encontrado en DB');
+        }
+      } else {
+        console.log('⚠️ No se pudo extraer Order ID del webhook');
       }
 
       res.writeHead(200);
