@@ -1,0 +1,25 @@
+{
+  "name": "paypal-backend",
+  "version": "1.0.0",
+  "description": "Backend Node.js para procesar pagos de PayPal con Supabase y notificaciones por email",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": [
+    "paypal",
+    "supabase",
+    "nodemailer",
+    "payments"
+  ],
+  "author": "UniqueMotors",
+  "license": "ISC",
+  "dependencies": {
+    "@paypal/checkout-server-sdk": "^1.0.3",
+    "@supabase/supabase-js": "^2.39.0",
+    "nodemailer": "^6.9.8",
+    "dotenv": "^16.3.1"
+  }
+}
