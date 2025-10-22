@@ -440,7 +440,7 @@ const server = http.createServer(async (req, res) => {
     try {
       const body = await getBody(req);
       console.log('[WEBHOOK] Event type:', body.event_type);
-      console.log('[WEBHOOK] Full body:', JSON.stringify(body, null, 2));
+      console.log('[WEBHOOK] Body:', JSON.stringify(body, null, 2));
 
       const eventType = body.event_type;
       const resource = body.resource;
@@ -493,7 +493,7 @@ const server = http.createServer(async (req, res) => {
               console.log('[WEBHOOK] Status -> COMPLETED');
               break;
             default:
-              console.log('[WEBHOOK] No specific action for event:', eventType);
+              console.log('[WEBHOOK] Event type desconocido:', eventType);
           }
 
           const { error } = await supabase
@@ -502,7 +502,7 @@ const server = http.createServer(async (req, res) => {
             .eq('paypal_order_id', orderID);
 
           if (error) {
-            console.error('[WEBHOOK] ERROR updating Supabase:', error);
+            console.error('[WEBHOOK] ERROR actualizando Supabase:', error);
           } else {
             console.log('[WEBHOOK] Supabase updated successfully');
           }
