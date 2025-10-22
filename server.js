@@ -88,8 +88,8 @@ async function getBody(req) {
 // Para habilitar emails, usar Railway o servicio SMTP alternativo
 // ============================================
 async function sendPaymentNotification(paymentData) {
-  console.log('[EMAIL] Funcion de email deshabilitada (SMTP bloqueado en Render)');
-  console.log('[EMAIL] Datos del pago guardados en Supabase:', paymentData.paypal_order_id);
+  // console.log('[EMAIL] Funcion de email deshabilitada (SMTP bloqueado en Render)');
+  // console.log('[EMAIL] Datos del pago guardados en Supabase:', paymentData.paypal_order_id);
 
   // Retornar success para no bloquear el flujo
   return { success: true, disabled: true };
@@ -414,9 +414,10 @@ const server = http.createServer(async (req, res) => {
           .eq('paypal_order_id', orderID);
         console.log('[CAPTURE] Error de notificacion guardado');
       }
-      */
 
       console.log('[CAPTURE] Enviando respuesta al cliente');
+      */
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         success: true,
