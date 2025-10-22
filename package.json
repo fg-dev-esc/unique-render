@@ -1,6 +1,6 @@
 {
   "name": "paypal-backend",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Backend Node.js para procesar pagos de PayPal con Supabase y notificaciones por email",
   "main": "server.js",
   "type": "module",

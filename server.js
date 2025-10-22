@@ -1,7 +1,3 @@
-// ============================================
-// BACKEND NODE.JS PURO - PAGOS PAYPAL
-// VERSION CON LOGS DETALLADOS
-// ============================================
 import 'dotenv/config';
 import http from 'http';
 import paypal from '@paypal/checkout-server-sdk';
@@ -40,7 +36,7 @@ const supabase = createClient(
 console.log('[INIT] Supabase configurado correctamente');
 
 // ============================================
-// CONFIGURACIÓN DE NODEMAILER (Gmail)
+// CONFIGURACIÓN DE NODEMAILER
 // COMENTADO - Render bloquea conexiones SMTP
 // ============================================
 // console.log('[INIT] Configurando Nodemailer...');
@@ -62,8 +58,10 @@ console.log('[INIT] Supabase configurado correctamente');
 // });
 // console.log('[INIT] Nodemailer configurado correctamente');
 
+
+
 // ============================================
-// FUNCIÓN: Leer cuerpo de petición
+// FUNCIÓN: Leer lo que manda en el body
 // ============================================
 async function getBody(req) {
   return new Promise((resolve) => {
@@ -85,16 +83,17 @@ async function getBody(req) {
 // ============================================
 // FUNCIÓN: Enviar email de notificación
 // COMENTADO - Render bloquea conexiones SMTP
-// Para habilitar emails, usar Railway o servicio SMTP alternativo
 // ============================================
 async function sendPaymentNotification(paymentData) {
   // console.log('[EMAIL] Funcion de email deshabilitada (SMTP bloqueado en Render)');
   // console.log('[EMAIL] Datos del pago guardados en Supabase:', paymentData.paypal_order_id);
 
-  // Retornar success para no bloquear el flujo
+  // ============================================
+  // DEUDA: Regresar success para que no truene
+  // ============================================
   return { success: true, disabled: true };
 
-  /* CODIGO ORIGINAL COMENTADO
+  /* 
   console.log('[EMAIL] Iniciando proceso de envio de emails');
   console.log('[EMAIL] Datos del pago:', JSON.stringify(paymentData, null, 2));
 
@@ -199,14 +198,13 @@ async function sendPaymentNotification(paymentData) {
 }
 
 // ============================================
-// SERVIDOR HTTP
+// HTTP
 // ============================================
 const server = http.createServer(async (req, res) => {
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] ${req.method} ${req.url}`);
   console.log(`[REQUEST] Origin: ${req.headers.origin || 'No origin header'}`);
 
-  // CORS headers
   const allowedOrigins = [
     'https://web2.uniquemotors.mx',
     'https://www.paypal.com',
@@ -229,7 +227,6 @@ const server = http.createServer(async (req, res) => {
   res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Preflight CORS
   if (req.method === 'OPTIONS') {
     console.log('[CORS] Preflight request');
     res.writeHead(204);
@@ -383,7 +380,6 @@ const server = http.createServer(async (req, res) => {
       }
 
       // EMAILS DESHABILITADOS - Render bloquea SMTP
-      // Para habilitar, migrar a Railway o usar servicio SMTP alternativo
       /*
       console.log('[CAPTURE] Iniciando envio de emails...');
       const emailResult = await sendPaymentNotification({
@@ -423,7 +419,7 @@ const server = http.createServer(async (req, res) => {
         success: true,
         order: captureResult,
         paymentRecord: data ? data[0] : null,
-        emailSent: false // Emails deshabilitados
+        emailSent: false
       }));
       console.log('[CAPTURE] Proceso completado exitosamente');
 
@@ -528,9 +524,6 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // ============================================
-  // Health Check
-  // ============================================
   if (req.method === 'GET' && req.url === '/') {
     console.log('[HEALTH] Health check request');
     res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -546,14 +539,13 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
-  // Not found
   console.log('[404] Route not found:', req.url);
   res.writeHead(404, { 'Content-Type': 'text/plain' });
   res.end('Not Found');
 });
 
 // ============================================
-// INICIAR SERVIDOR
+// INIT SERVER
 // ============================================
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
