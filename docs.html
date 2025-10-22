@@ -87,6 +87,71 @@
     svg {
       display: inline;
     }
+
+    /* Modal Styles (Shadcn-inspired) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: #09090b;
+      border: 1px solid #27272a;
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      max-width: 32rem;
+      width: 90%;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-1rem);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background-color: #000000;
+      border: 1px solid #27272a;
+      border-radius: 0.5rem;
+      color: #ffffff;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .modal-input:focus {
+      outline: none;
+      border-color: var(--color-blue);
+      box-shadow: 0 0 0 3px rgba(20, 71, 230, 0.1);
+    }
+
+    .modal-input::placeholder {
+      color: #52525b;
+    }
   </style>
 </head>
 <body class="min-h-screen bg-black text-white">
@@ -602,7 +667,13 @@ Content-Type: application/json
 
     function abrirPayPal() {
       if (window.currentOrderID) {
+        // Abrir PayPal en nueva ventana
         window.open(`https://www.sandbox.paypal.com/checkoutnow?token=${window.currentOrderID}`, '_blank');
+
+        // Mostrar modal con el Order ID
+        setTimeout(() => {
+          mostrarModalOrderID();
+        }, 500);
       }
     }
 
@@ -856,6 +927,147 @@ Content-Type: application/json
         // Error silencioso
       }
     }
+
+    // Modal functions
+    function mostrarModalOrderID() {
+      const modal = document.getElementById('modalOrderID');
+      const input = document.getElementById('modalOrderIDInput');
+
+      if (window.currentOrderID) {
+        input.value = window.currentOrderID;
+      }
+
+      modal.classList.add('active');
+
+      // Inicializar iconos de Lucide en el modal
+      lucide.createIcons();
+
+      // Focus en el input después de que se muestre el modal
+      setTimeout(() => {
+        input.focus();
+        input.select();
+      }, 100);
+    }
+
+    function cerrarModal() {
+      const modal = document.getElementById('modalOrderID');
+      modal.classList.remove('active');
+    }
+
+    function pegarEnCapture() {
+      const modalInput = document.getElementById('modalOrderIDInput');
+      const captureInput = document.getElementById('captureOrderID');
+
+      if (modalInput.value.trim()) {
+        captureInput.value = modalInput.value.trim();
+
+        // Copiar al clipboard también
+        navigator.clipboard.writeText(modalInput.value.trim());
+
+        // Cerrar modal
+        cerrarModal();
+
+        // Scroll al endpoint de capture
+        document.getElementById('capture-order').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Flash en el input de capture
+        captureInput.classList.add('ring-2');
+        captureInput.style.setProperty('--tw-ring-color', 'var(--color-blue)');
+        setTimeout(() => {
+          captureInput.classList.remove('ring-2');
+        }, 2000);
+      }
+    }
+
+    // Cerrar modal al hacer click fuera
+    document.addEventListener('click', (e) => {
+      const modal = document.getElementById('modalOrderID');
+      if (e.target === modal) {
+        cerrarModal();
+      }
+    });
+
+    // Cerrar modal con tecla Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        cerrarModal();
+      }
+    });
+
+    // Detectar si regresamos de PayPal y mostrar modal automáticamente
+    window.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      const PayerID = urlParams.get('PayerID');
+
+      // Si hay token y PayerID, significa que regresamos de PayPal
+      if (token && PayerID) {
+        // Guardar el Order ID
+        window.currentOrderID = token;
+
+        // Mostrar el modal automáticamente
+        setTimeout(() => {
+          mostrarModalOrderID();
+        }, 500);
+
+        // Limpiar la URL para que no se vea feo
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    });
   </script>
+
+  <!-- Modal Order ID -->
+  <div id="modalOrderID" class="modal-overlay">
+    <div class="modal-content">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <i data-lucide="check-circle-2" class="w-5 h-5 text-green-400"></i>
+          <h3 class="text-lg font-semibold text-white">Order ID Generado</h3>
+        </div>
+        <button onclick="cerrarModal()" class="text-zinc-400 hover:text-white transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <p class="text-sm text-zinc-400 mb-4">
+        Ya puedes pegar el Order ID en el siguiente input para capturar la orden.
+      </p>
+
+      <div class="space-y-4">
+        <div>
+          <label for="modalOrderIDInput" class="block text-sm font-medium text-zinc-300 mb-2">
+            Order ID
+          </label>
+          <input
+            type="text"
+            id="modalOrderIDInput"
+            class="modal-input font-mono"
+            readonly
+            placeholder="Generando Order ID..."
+          />
+          <p class="text-xs text-zinc-500 mt-2 flex items-center gap-1">
+            <i data-lucide="info" class="w-3 h-3"></i>
+            Este ID se copiará automáticamente al siguiente input
+          </p>
+        </div>
+
+        <div class="flex gap-3">
+          <button
+            onclick="pegarEnCapture()"
+            class="flex-1 btn-blue text-white font-medium py-2.5 px-4 rounded-md transition-colors text-sm flex items-center justify-center gap-2 hover:bg-opacity-90"
+          >
+            <i data-lucide="arrow-down-to-line" class="w-4 h-4"></i>
+            Pegar en Capture Order
+          </button>
+          <button
+            onclick="cerrarModal()"
+            class="px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-md transition-colors text-sm"
+          >
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
