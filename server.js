@@ -41,25 +41,26 @@ console.log('[INIT] Supabase configurado correctamente');
 
 // ============================================
 // CONFIGURACIÓN DE NODEMAILER (Gmail)
+// COMENTADO - Render bloquea conexiones SMTP
 // ============================================
-console.log('[INIT] Configurando Nodemailer...');
-console.log('[INIT] Email User:', process.env.EMAIL_USER);
-console.log('[INIT] Email Pass:', process.env.EMAIL_PASS ? 'SET' : 'MISSING');
-console.log('[INIT] Email Admin:', process.env.EMAIL_ADMIN);
+// console.log('[INIT] Configurando Nodemailer...');
+// console.log('[INIT] Email User:', process.env.EMAIL_USER);
+// console.log('[INIT] Email Pass:', process.env.EMAIL_PASS ? 'SET' : 'MISSING');
+// console.log('[INIT] Email Admin:', process.env.EMAIL_ADMIN);
 
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, // usar SSL
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: true
-  }
-});
-console.log('[INIT] Nodemailer configurado correctamente');
+// const transporter = nodemailer.createTransport({
+//   host: 'smtp.gmail.com',
+//   port: 465,
+//   secure: true, // usar SSL
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS
+//   },
+//   tls: {
+//     rejectUnauthorized: true
+//   }
+// });
+// console.log('[INIT] Nodemailer configurado correctamente');
 
 // ============================================
 // FUNCIÓN: Leer cuerpo de petición
@@ -83,8 +84,17 @@ async function getBody(req) {
 
 // ============================================
 // FUNCIÓN: Enviar email de notificación
+// COMENTADO - Render bloquea conexiones SMTP
+// Para habilitar emails, usar Railway o servicio SMTP alternativo
 // ============================================
 async function sendPaymentNotification(paymentData) {
+  console.log('[EMAIL] Funcion de email deshabilitada (SMTP bloqueado en Render)');
+  console.log('[EMAIL] Datos del pago guardados en Supabase:', paymentData.paypal_order_id);
+
+  // Retornar success para no bloquear el flujo
+  return { success: true, disabled: true };
+
+  /* CODIGO ORIGINAL COMENTADO
   console.log('[EMAIL] Iniciando proceso de envio de emails');
   console.log('[EMAIL] Datos del pago:', JSON.stringify(paymentData, null, 2));
 
@@ -185,6 +195,7 @@ async function sendPaymentNotification(paymentData) {
     console.error('[EMAIL] ERROR response:', error.response);
     return { success: false, error: error.message };
   }
+  */
 }
 
 // ============================================
