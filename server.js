@@ -421,12 +421,54 @@ const server = http.createServer(async (req, res) => {
       console.log('[CAPTURE] Enviando respuesta al cliente');
       */
 
+      // Esperar a que llegue el webhook de PayPal (máximo 30 segundos)
+      console.log('[CAPTURE] Esperando webhook de PayPal...');
+      let webhookReceived = false;
+      let attempts = 0;
+      const maxAttempts = 30; // 30 intentos de 1 segundo = 30 segundos máximo
+
+      while (!webhookReceived && attempts < maxAttempts) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // Esperar 1 segundo
+        attempts++;
+
+        // Consultar si el webhook ya actualizó el registro
+        const { data: updatedPayment } = await supabase
+          .from('paypal_payments')
+          .select('status, updated_at')
+          .eq('paypal_order_id', orderID)
+          .single();
+
+        if (updatedPayment) {
+          // Verificar si el webhook actualizó (comparando updated_at o si el status cambió)
+          const timeDiff = new Date(updatedPayment.updated_at) - new Date(data[0].updated_at);
+
+          if (timeDiff > 1000) { // Si se actualizó más de 1 segundo después
+            webhookReceived = true;
+            console.log(`[CAPTURE] Webhook recibido después de ${attempts} segundos`);
+            console.log('[CAPTURE] Estado actualizado por webhook:', updatedPayment.status);
+          }
+        }
+      }
+
+      if (!webhookReceived) {
+        console.log('[CAPTURE] WARNING - Webhook no recibido en 30 segundos');
+      }
+
+      // Obtener el registro final actualizado
+      const { data: finalPayment } = await supabase
+        .from('paypal_payments')
+        .select('*')
+        .eq('paypal_order_id', orderID)
+        .single();
+
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({
         success: true,
         order: captureResult,
-        paymentRecord: data ? data[0] : null,
-        emailSent: false
+        paymentRecord: finalPayment || data[0],
+        emailSent: false,
+        webhookReceived: webhookReceived,
+        waitTime: `${attempts} segundos`
       }));
       console.log('[CAPTURE] Proceso completado exitosamente');
 
