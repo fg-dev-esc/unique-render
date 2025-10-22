@@ -138,10 +138,10 @@
       <!-- Content -->
       <div class="max-w-6xl mx-auto p-6 space-y-6">
         <!-- Base URL Info -->
-        <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-6">
+        <div class="endpoint-card p-6">
           <div class="text-sm text-zinc-400 mb-2">BASE URL</div>
           <div class="flex items-center gap-3">
-            <code class="text-blue-accent font-mono text-sm">https://unique-motors.onrender.com</code>
+            <code class="text-zinc-300 font-mono text-sm">https://unique-motors.onrender.com</code>
             <button onclick="copyToClipboard('https://unique-motors.onrender.com')" class="text-zinc-400 hover:text-white transition-colors" title="Copy URL">
               <i data-lucide="copy" class="w-4 h-4"></i>
             </button>
@@ -183,27 +183,27 @@
                 <h4 class="text-sm font-semibold text-zinc-300 mb-3">Body Parameters</h4>
                 <div class="space-y-3">
                   <div class="bg-zinc-900 border border-zinc-800 rounded p-4">
-                    <div class="font-mono text-sm text-blue-accent mb-1">amount</div>
+                    <div class="font-mono text-sm text-zinc-300 mb-1">amount</div>
                     <div class="text-xs text-zinc-500 mb-2">number (required)</div>
                     <p class="text-xs text-zinc-400">Monto a cobrar (ej: 1500)</p>
                   </div>
                   <div class="bg-zinc-900 border border-zinc-800 rounded p-4">
-                    <div class="font-mono text-sm text-blue-accent mb-1">currency</div>
+                    <div class="font-mono text-sm text-zinc-300 mb-1">currency</div>
                     <div class="text-xs text-zinc-500 mb-2">string (default: MXN)</div>
                     <p class="text-xs text-zinc-400">Código de moneda (MXN, USD, etc.)</p>
                   </div>
                   <div class="bg-zinc-900 border border-zinc-800 rounded p-4">
-                    <div class="font-mono text-sm text-blue-accent mb-1">paymentContext</div>
+                    <div class="font-mono text-sm text-zinc-300 mb-1">paymentContext</div>
                     <div class="text-xs text-zinc-500 mb-2">string (required)</div>
                     <p class="text-xs text-zinc-400">"guarantee" o "adjudicacion"</p>
                   </div>
                   <div class="bg-zinc-900 border border-zinc-800 rounded p-4">
-                    <div class="font-mono text-sm text-blue-accent mb-1">torreID</div>
+                    <div class="font-mono text-sm text-zinc-300 mb-1">torreID</div>
                     <div class="text-xs text-zinc-500 mb-2">string (optional)</div>
                     <p class="text-xs text-zinc-400">Identificador de torre</p>
                   </div>
                   <div class="bg-zinc-900 border border-zinc-800 rounded p-4">
-                    <div class="font-mono text-sm text-blue-accent mb-1">articuloNombre</div>
+                    <div class="font-mono text-sm text-zinc-300 mb-1">articuloNombre</div>
                     <div class="text-xs text-zinc-500 mb-2">string (optional)</div>
                     <p class="text-xs text-zinc-400">Nombre del artículo</p>
                   </div>
@@ -227,10 +227,20 @@
               <div>
                 <div class="flex items-center justify-between mb-3">
                   <h4 class="text-sm font-semibold text-zinc-300">Response</h4>
-                  <button onclick="copiarRespuesta('createOrderResponse')" class="text-zinc-400 hover:text-white transition-colors text-xs px-3 py-1 border border-zinc-700 rounded hover:border-zinc-500 flex items-center gap-2">
-                    <i data-lucide="copy" class="w-4 h-4"></i>
-                    Copiar
-                  </button>
+                  <div class="flex gap-2">
+                    <button onclick="abrirPayPal()" id="abrirPayPalBtn" class="text-zinc-400 hover:text-white transition-colors text-xs px-3 py-1 border border-zinc-700 rounded hover:border-zinc-500 flex items-center gap-2 hidden">
+                      <i data-lucide="external-link" class="w-4 h-4"></i>
+                      Abrir PayPal
+                    </button>
+                    <button onclick="copiarSoloID()" id="copiarIDBtn" class="text-zinc-400 hover:text-white transition-colors text-xs px-3 py-1 border border-zinc-700 rounded hover:border-zinc-500 flex items-center gap-2 hidden">
+                      <i data-lucide="copy" class="w-4 h-4"></i>
+                      Copiar ID
+                    </button>
+                    <button onclick="copiarRespuesta('createOrderResponse')" class="text-zinc-400 hover:text-white transition-colors text-xs px-3 py-1 border border-zinc-700 rounded hover:border-zinc-500 flex items-center gap-2">
+                      <i data-lucide="copy" class="w-4 h-4"></i>
+                      Copiar Todo
+                    </button>
+                  </div>
                 </div>
                 <div id="createOrderResponse" class="code-block text-xs overflow-auto max-h-96">
                   <code id="createOrderResponseCode" class="text-green-400">Aquí aparecerá el response...</code>
@@ -371,15 +381,29 @@ Content-Type: application/json
               </div>
 
               <div>
-                <h4 class="text-sm font-semibold text-zinc-300 mb-3">Payload Ejemplo</h4>
+                <h4 class="text-sm font-semibold text-zinc-300 mb-3">Ejemplo: PAYMENT.CAPTURE.COMPLETED</h4>
                 <div class="code-block">
 <code>{
+  "id": "WH-1A2B3C4D5E6F7G8H",
   "event_type": "PAYMENT.CAPTURE.COMPLETED",
+  "create_time": "2024-10-22T15:30:45Z",
   "resource": {
-    "id": "capture-id-123",
+    "id": "4VB83654HS123456",
+    "status": "COMPLETED",
+    "amount": {
+      "currency_code": "MXN",
+      "value": "1500.00"
+    },
     "supplementary_data": {
       "related_ids": {
-        "order_id": "5O190127H6828335L"
+        "order_id": "44P80931C43019322"
+      }
+    },
+    "payer": {
+      "email_address": "buyer@example.com",
+      "name": {
+        "given_name": "John",
+        "surname": "Doe"
       }
     }
   }
@@ -390,9 +414,21 @@ Content-Type: application/json
 
             <div id="res3" class="space-y-4 hidden">
               <div>
-                <h4 class="text-sm font-semibold text-zinc-300 mb-3">Response 200 OK</h4>
-                <div class="code-block">
-<code><span class="text-green-400">{}</span></code>
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-sm font-semibold text-zinc-300">Webhook Recibido de PayPal</h4>
+                  <div class="flex gap-2">
+                    <button onclick="simularWebhook()" id="simularWebhookBtn" class="text-zinc-400 hover:text-white transition-colors text-xs px-3 py-1 border border-zinc-700 rounded hover:border-zinc-500 flex items-center gap-2">
+                      <i data-lucide="send" class="w-4 h-4"></i>
+                      Simular Webhook
+                    </button>
+                    <button onclick="copiarRespuesta('webhookResponse')" class="text-zinc-400 hover:text-white transition-colors text-xs px-3 py-1 border border-zinc-700 rounded hover:border-zinc-500 flex items-center gap-2">
+                      <i data-lucide="copy" class="w-4 h-4"></i>
+                      Copiar
+                    </button>
+                  </div>
+                </div>
+                <div id="webhookResponse" class="code-block text-xs overflow-auto max-h-96">
+                  <code id="webhookResponseCode" class="text-yellow-400">Haz click en 'Simular Webhook' para ver un ejemplo...</code>
                 </div>
               </div>
             </div>
@@ -526,11 +562,97 @@ Content-Type: application/json
 
         responseCode.textContent = formattedResponse;
         responseCode.className = response.ok ? 'text-green-400' : 'text-red-400';
+
+        // Show PayPal button if response has ID
+        if (response.ok && data.id) {
+          window.currentOrderID = data.id;
+          document.getElementById('abrirPayPalBtn').classList.remove('hidden');
+          document.getElementById('copiarIDBtn').classList.remove('hidden');
+          lucide.createIcons();
+        }
       } catch (error) {
         const errorMessage = `Error: ${error.message}\n\nAsegúrate de que el servidor esté corriendo en https://unique-motors.onrender.com`;
         responseCode.textContent = errorMessage;
         responseCode.className = 'text-red-400';
       }
+    }
+
+    function abrirPayPal() {
+      if (window.currentOrderID) {
+        window.open(`https://www.sandbox.paypal.com/checkoutnow?token=${window.currentOrderID}`, '_blank');
+      }
+    }
+
+    function copiarSoloID() {
+      if (window.currentOrderID) {
+        navigator.clipboard.writeText(window.currentOrderID).then(() => {
+          // Show success feedback
+          const btn = document.getElementById('copiarIDBtn');
+          const originalHTML = btn.innerHTML;
+          btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Copiado!';
+          btn.classList.add('text-green-400');
+          btn.classList.remove('text-zinc-400');
+          lucide.createIcons();
+          setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('text-green-400');
+            btn.classList.add('text-zinc-400');
+            lucide.createIcons();
+          }, 2000);
+        }).catch(() => {
+          // Error silencioso
+        });
+      }
+    }
+
+    function simularWebhook() {
+      const webhookResponseCode = document.getElementById('webhookResponseCode');
+
+      // Crear webhook simulado con datos reales de PayPal
+      const webhookSimulado = {
+        id: "WH-" + Math.random().toString(36).substr(2, 9).toUpperCase(),
+        event_type: "PAYMENT.CAPTURE.COMPLETED",
+        create_time: new Date().toISOString(),
+        resource: {
+          id: "CAPTURE-" + Math.random().toString(36).substr(2, 9).toUpperCase(),
+          status: "COMPLETED",
+          amount: {
+            currency_code: "MXN",
+            value: "100.00"
+          },
+          supplementary_data: {
+            related_ids: {
+              order_id: window.currentOrderID || "44P80931C43019322"
+            }
+          },
+          payer: {
+            email_address: "buyer@example.com",
+            name: {
+              given_name: "John",
+              surname: "Doe"
+            }
+          }
+        }
+      };
+
+      // Mostrar en el UI
+      webhookResponseCode.textContent = JSON.stringify(webhookSimulado, null, 2);
+      webhookResponseCode.className = 'text-green-400';
+
+      // Feedback visual
+      const btn = document.getElementById('simularWebhookBtn');
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Simulado!';
+      btn.classList.add('text-green-400');
+      btn.classList.remove('text-zinc-400');
+      lucide.createIcons();
+
+      setTimeout(() => {
+        btn.innerHTML = originalHTML;
+        btn.classList.remove('text-green-400');
+        btn.classList.add('text-zinc-400');
+        lucide.createIcons();
+      }, 2000);
     }
 
     async function testHealthCheck() {
@@ -604,7 +726,7 @@ Content-Type: application/json
 
       try {
         // Show loading state
-        responseCode.textContent = 'Cargando...';
+        responseCode.textContent = 'Cargando... esperando respuesta de PayPal';
         responseCode.className = 'text-yellow-400';
 
         // Switch to response tab
@@ -640,6 +762,12 @@ Content-Type: application/json
 
         responseCode.textContent = formattedResponse;
         responseCode.className = response.ok ? 'text-green-400' : 'text-red-400';
+
+        // Si el status es 200 OK, mostrar info sobre el webhook
+        if (response.ok && response.status === 200) {
+          responseCode.textContent += '\n\nPayPal enviará un webhook de confirmación a tu servidor.\nPuedes ver un ejemplo en el tab "Webhook" -> "Response" -> "Simular Webhook"';
+          responseCode.className = 'text-green-400';
+        }
       } catch (error) {
         const errorMessage = `Error: ${error.message}\n\nAsegúrate de que el servidor esté corriendo en https://unique-motors.onrender.com`;
         responseCode.textContent = errorMessage;
