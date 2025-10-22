@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PayPal API - UniqueMotors</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    :root {
+      --color-blue: #1447e6;
+    }
+
+    * {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    body {
+      background-color: #000000;
+    }
+    .method-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.375rem;
+      letter-spacing: 0.05em;
+    }
+    .method-post {
+      background-color: #10b981;
+      color: white;
+    }
+    .method-get {
+      background-color: #3b82f6;
+      color: white;
+    }
+    .code-block {
+      background-color: #0f0f0f;
+      border: 1px solid #27272a;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.875rem;
+      color: #e4e4e7;
+      line-height: 1.5;
+    }
+    .endpoint-card {
+      background-color: #09090b;
+      border: 1px solid #27272a;
+      border-radius: 0.75rem;
+      transition: all 0.3s ease;
+    }
+    .endpoint-card:hover {
+      border-color: var(--color-blue);
+      box-shadow: 0 10px 25px rgba(20, 71, 230, 0.1);
+    }
+    .tab-button {
+      padding: 0.5rem 1rem;
+      border-bottom: 2px solid transparent;
+      color: #a1a1a1;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .tab-button.active {
+      border-bottom-color: var(--color-blue);
+      color: #ffffff;
+    }
+
+    .btn-blue {
+      background-color: var(--color-blue);
+    }
+
+    .btn-blue:hover {
+      background-color: #0e3bb3;
+    }
+
+    .text-blue-accent {
+      color: var(--color-blue);
+    }
+    .tab-button:hover {
+      color: #ffffff;
+    }
+    svg {
+      display: inline;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-black text-white">
+  <div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 border-r border-zinc-800 bg-zinc-950 overflow-y-auto hidden lg:block">
+      <div class="p-6">
+        <div class="flex items-center gap-2 mb-6">
+          <i data-lucide="package" class="w-5 h-5 text-blue-accent"></i>
+          <h2 class="text-lg font-semibold">PayPal API</h2>
+        </div>
+        <nav class="space-y-1">
+          <a href="#" class="flex items-center gap-3 px-4 py-2 rounded-md text-sm text-zinc-400 hover:text-white hover:bg-zinc-800">
+            <i data-lucide="book-open" class="w-4 h-4"></i>
+            Introducción
+          </a>
+          <a href="#create-order" class="flex items-center gap-3 px-4 py-2 rounded-md text-sm text-zinc-400 hover:text-white hover:bg-zinc-800">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            Crear Orden
+          </a>
+          <a href="#capture-order" class="flex items-center gap-3 px-4 py-2 rounded-md text-sm text-zinc-400 hover:text-white hover:bg-zinc-800">
+            <i data-lucide="check-circle" class="w-4 h-4"></i>
+            Capturar Orden
+          </a>
+          <a href="#webhook" class="flex items-center gap-3 px-4 py-2 rounded-md text-sm text-zinc-400 hover:text-white hover:bg-zinc-800">
+            <i data-lucide="webhook" class="w-4 h-4"></i>
+            Webhook
+          </a>
+          <a href="#health" class="flex items-center gap-3 px-4 py-2 rounded-md text-sm text-zinc-400 hover:text-white hover:bg-zinc-800">
+            <i data-lucide="heart-handshake" class="w-4 h-4"></i>
+            Health Check
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto">
+      <!-- Header -->
+      <div class="border-b border-zinc-800 bg-zinc-950 sticky top-0 z-10">
+        <div class="max-w-6xl mx-auto px-6 py-6">
+          <h1 class="text-3xl font-bold mb-2">PayPal Backend API</h1>
+          <p class="text-zinc-400 text-sm">
+            Documentación para procesamiento de pagos
+          </p>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="max-w-6xl mx-auto p-6 space-y-6">
+        <!-- Base URL Info -->
+        <div class="bg-zinc-950 border border-zinc-800 rounded-lg p-6">
+          <div class="text-sm text-zinc-400 mb-2">BASE URL</div>
+          <div class="flex items-center gap-3">
+            <code class="text-blue-accent font-mono text-sm">https://unique-motors.onrender.com</code>
+            <button onclick="copyToClipboard('https://unique-motors.onrender.com')" class="text-zinc-400 hover:text-white transition-colors" title="Copy URL">
+              <i data-lucide="copy" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Endpoint 1: Create Order -->
+        <div id="create-order" class="endpoint-card overflow-hidden">
+          <div class="bg-zinc-900 border-b border-zinc-800 p-6">
+            <div class="flex items-start justify-between mb-2">
+              <div class="flex items-center gap-3">
+                <span class="method-badge method-post">POST</span>
+                <code class="text-zinc-300 font-mono">/api/orders</code>
+              </div>
+            </div>
+            <p class="text-zinc-400 text-sm">Crear una nueva orden de pago</p>
+          </div>
+
+          <div class="p-6 space-y-6">
+            <!-- Description -->
+            <div>
+              <h3 class="text-sm font-semibold mb-3 text-zinc-300">Descripción</h3>
+              <p class="text-zinc-400 text-sm leading-relaxed">
+                Crea una nueva orden de pago en PayPal. La orden puede ser un depósito de garantía o un pago de adjudicación. El sistema almacena automáticamente los detalles en Supabase.
+              </p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="border-b border-zinc-800">
+              <div class="flex gap-4">
+                <button class="tab-button active" onclick="switchTab(event, 'req1')">Request</button>
+                <button class="tab-button" onclick="switchTab(event, 'res1')">Response</button>
+              </div>
+            </div>
+
+            <!-- Request Tab -->
+            <div id="req1" class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold text-zinc-300 mb-3">Body Parameters</h4>
+                <div class="space-y-3">
+                  <div class="bg-zinc-900 border border-zinc-800 rounded p-4">
+                    <div class="font-mono text-sm text-blue-accent mb-1">amount</div>
+                    <div class="text-xs text-zinc-500 mb-2">number (required)</div>
+                    <p class="text-xs text-zinc-400">Monto a cobrar (ej: 1500)</p>
+                  </div>
+                  <div class="bg-zinc-900 border border-zinc-800 rounded p-4">
+                    <div class="font-mono text-sm text-blue-accent mb-1">currency</div>
+                    <div class="text-xs text-zinc-500 mb-2">string (default: MXN)</div>
+                    <p class="text-xs text-zinc-400">Código de moneda (MXN, USD, etc.)</p>
+                  </div>
+                  <div class="bg-zinc-900 border border-zinc-800 rounded p-4">
+                    <div class="font-mono text-sm text-blue-accent mb-1">paymentContext</div>
+                    <div class="text-xs text-zinc-500 mb-2">string (required)</div>
+                    <p class="text-xs text-zinc-400">"guarantee" o "adjudicacion"</p>
+                  </div>
+                  <div class="bg-zinc-900 border border-zinc-800 rounded p-4">
+                    <div class="font-mono text-sm text-blue-accent mb-1">torreID</div>
+                    <div class="text-xs text-zinc-500 mb-2">string (optional)</div>
+                    <p class="text-xs text-zinc-400">Identificador de torre</p>
+                  </div>
+                  <div class="bg-zinc-900 border border-zinc-800 rounded p-4">
+                    <div class="font-mono text-sm text-blue-accent mb-1">articuloNombre</div>
+                    <div class="text-xs text-zinc-500 mb-2">string (optional)</div>
+                    <p class="text-xs text-zinc-400">Nombre del artículo</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="text-sm font-semibold text-zinc-300 mb-3">Ejemplo</h4>
+                <div class="code-block">
+<code>{
+  "amount": 1500,
+  "currency": "MXN",
+  "paymentContext": "guarantee"
+}</code>
+                </div>
+              </div>
+            </div>
+
+            <!-- Response Tab -->
+            <div id="res1" class="space-y-4 hidden">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-sm font-semibold text-zinc-300">Response</h4>
+                  <button onclick="copiarRespuesta('createOrderResponse')" class="text-zinc-400 hover:text-white transition-colors text-xs px-3 py-1 border border-zinc-700 rounded hover:border-zinc-500 flex items-center gap-2">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    Copiar
+                  </button>
+                </div>
+                <div id="createOrderResponse" class="code-block text-xs overflow-auto max-h-96">
+                  <code id="createOrderResponseCode" class="text-green-400">Aquí aparecerá el response...</code>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="testCreateOrder()" class="w-full btn-blue text-white font-medium py-2 px-4 rounded transition-colors text-sm flex items-center justify-center gap-2">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              Try it out
+            </button>
+          </div>
+        </div>
+
+        <!-- Endpoint 2: Capture Order -->
+        <div id="capture-order" class="endpoint-card overflow-hidden">
+          <div class="bg-zinc-900 border-b border-zinc-800 p-6">
+            <div class="flex items-start justify-between mb-2">
+              <div class="flex items-center gap-3">
+                <span class="method-badge method-post">POST</span>
+                <code class="text-zinc-300 font-mono">/api/orders/:orderID/capture</code>
+              </div>
+            </div>
+            <p class="text-zinc-400 text-sm">Capturar y completar una orden de pago</p>
+          </div>
+
+          <div class="p-6 space-y-6">
+            <div>
+              <h3 class="text-sm font-semibold mb-3 text-zinc-300">Descripción</h3>
+              <p class="text-zinc-400 text-sm leading-relaxed">
+                Captura una orden aprobada y completa la transacción de pago. La orden debe estar en estado APPROVED.
+              </p>
+            </div>
+
+            <div class="border-b border-zinc-800">
+              <div class="flex gap-4">
+                <button class="tab-button active" onclick="switchTab(event, 'req2')">Request</button>
+                <button class="tab-button" onclick="switchTab(event, 'res2')">Response</button>
+              </div>
+            </div>
+
+            <div id="req2" class="space-y-4">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-sm font-semibold text-zinc-300">Order ID</h4>
+                  <button onclick="pegarOrderID()" class="text-zinc-400 hover:text-white transition-colors text-xs px-3 py-1 border border-zinc-700 rounded hover:border-zinc-500 flex items-center gap-2">
+                    <i data-lucide="clipboard-paste" class="w-4 h-4"></i>
+                    Pegar
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  id="captureOrderID"
+                  placeholder="Ingresa el Order ID (ej: 5O190127H6828335L)"
+                  class="w-full px-4 py-2 bg-black border border-zinc-700 rounded-md text-white placeholder-zinc-500 focus:outline-none focus:ring-2 transition-all"
+                  style="--tw-ring-color: var(--color-blue);"
+                />
+                <p class="text-xs text-zinc-500 mt-2">Copia el ID que obtuviste del endpoint /api/orders</p>
+              </div>
+
+              <div>
+                <h4 class="text-sm font-semibold text-zinc-300 mb-3">Ejemplo de Uso</h4>
+                <div class="code-block">
+<code>POST /api/orders/5O190127H6828335L/capture
+Content-Type: application/json
+
+{}</code>
+                </div>
+              </div>
+            </div>
+
+            <div id="res2" class="space-y-4 hidden">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-sm font-semibold text-zinc-300">Response</h4>
+                  <button onclick="copiarRespuesta('captureResponse')" class="text-zinc-400 hover:text-white transition-colors text-xs px-3 py-1 border border-zinc-700 rounded hover:border-zinc-500 flex items-center gap-2">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    Copiar
+                  </button>
+                </div>
+                <div id="captureResponse" class="code-block text-xs overflow-auto max-h-96">
+                  <code id="captureResponseCode" class="text-green-400">Aquí aparecerá el response...</code>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="captureOrder()" class="w-full btn-blue text-white font-medium py-2 px-4 rounded transition-colors text-sm flex items-center justify-center gap-2">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              Try it out
+            </button>
+          </div>
+        </div>
+
+        <!-- Endpoint 3: Webhook -->
+        <div id="webhook" class="endpoint-card overflow-hidden">
+          <div class="bg-zinc-900 border-b border-zinc-800 p-6">
+            <div class="flex items-start justify-between mb-2">
+              <div class="flex items-center gap-3">
+                <span class="method-badge method-post">POST</span>
+                <code class="text-zinc-300 font-mono">/api/webhook</code>
+              </div>
+            </div>
+            <p class="text-zinc-400 text-sm">Notificaciones de PayPal</p>
+          </div>
+
+          <div class="p-6 space-y-6">
+            <div>
+              <h3 class="text-sm font-semibold mb-3 text-zinc-300">Descripción</h3>
+              <p class="text-zinc-400 text-sm leading-relaxed">
+                Endpoint para recibir notificaciones de PayPal. Actualiza automáticamente el estado del pago en base a eventos de PayPal.
+              </p>
+            </div>
+
+            <div class="border-b border-zinc-800">
+              <div class="flex gap-4">
+                <button class="tab-button active" onclick="switchTab(event, 'req3')">Request</button>
+                <button class="tab-button" onclick="switchTab(event, 'res3')">Response</button>
+              </div>
+            </div>
+
+            <div id="req3" class="space-y-4">
+              <div>
+                <h4 class="text-sm font-semibold text-zinc-300 mb-3">Eventos Soportados</h4>
+                <div class="space-y-2">
+                  <div class="bg-zinc-900 border border-zinc-800 rounded p-3">
+                    <div class="font-mono text-sm text-green-400">PAYMENT.CAPTURE.COMPLETED</div>
+                    <p class="text-xs text-zinc-400 mt-1">Establece estado a COMPLETED</p>
+                  </div>
+                  <div class="bg-zinc-900 border border-zinc-800 rounded p-3">
+                    <div class="font-mono text-sm text-red-400">PAYMENT.CAPTURE.DENIED</div>
+                    <p class="text-xs text-zinc-400 mt-1">Establece estado a FAILED</p>
+                  </div>
+                  <div class="bg-zinc-900 border border-zinc-800 rounded p-3">
+                    <div class="font-mono text-sm text-yellow-400">PAYMENT.CAPTURE.REFUNDED</div>
+                    <p class="text-xs text-zinc-400 mt-1">Establece estado a REFUNDED</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 class="text-sm font-semibold text-zinc-300 mb-3">Payload Ejemplo</h4>
+                <div class="code-block">
+<code>{
+  "event_type": "PAYMENT.CAPTURE.COMPLETED",
+  "resource": {
+    "id": "capture-id-123",
+    "supplementary_data": {
+      "related_ids": {
+        "order_id": "5O190127H6828335L"
+      }
+    }
+  }
+}</code>
+                </div>
+              </div>
+            </div>
+
+            <div id="res3" class="space-y-4 hidden">
+              <div>
+                <h4 class="text-sm font-semibold text-zinc-300 mb-3">Response 200 OK</h4>
+                <div class="code-block">
+<code><span class="text-green-400">{}</span></code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Endpoint 4: Health Check -->
+        <div id="health" class="endpoint-card overflow-hidden">
+          <div class="bg-zinc-900 border-b border-zinc-800 p-6">
+            <div class="flex items-start justify-between mb-2">
+              <div class="flex items-center gap-3">
+                <span class="method-badge method-get">GET</span>
+                <code class="text-zinc-300 font-mono">/</code>
+              </div>
+            </div>
+            <p class="text-zinc-400 text-sm">Verificación de salud del servicio</p>
+          </div>
+
+          <div class="p-6 space-y-6">
+            <div>
+              <h3 class="text-sm font-semibold mb-3 text-zinc-300">Descripción</h3>
+              <p class="text-zinc-400 text-sm leading-relaxed">
+                Retorna el estado del servicio y lista de endpoints disponibles. Útil para verificaciones de salud.
+              </p>
+            </div>
+
+            <div class="border-b border-zinc-800">
+              <div class="flex gap-4">
+                <button class="tab-button active" onclick="switchTab(event, 'res4')">Response</button>
+              </div>
+            </div>
+
+            <div id="res4" class="space-y-4">
+              <div>
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-sm font-semibold text-zinc-300">Response</h4>
+                  <button onclick="copiarRespuesta('healthResponse')" class="text-zinc-400 hover:text-white transition-colors text-xs px-3 py-1 border border-zinc-700 rounded hover:border-zinc-500 flex items-center gap-2">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    Copiar
+                  </button>
+                </div>
+                <div id="healthResponse" class="code-block text-xs overflow-auto max-h-96">
+                  <code id="healthResponseCode" class="text-green-400">Aquí aparecerá el response...</code>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="testHealthCheck()" class="w-full btn-blue text-white font-medium py-2 px-4 rounded transition-colors text-sm flex items-center justify-center gap-2">
+              <i data-lucide="play" class="w-4 h-4"></i>
+              Try it out
+            </button>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="border-t border-zinc-800 mt-12 pt-6 pb-6">
+          <p class="text-zinc-500 text-sm">© 2024 UniqueMotors. All rights reserved.</p>
+          <p class="text-zinc-600 text-xs mt-2">Last updated: October 2025</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    function switchTab(event, tabId) {
+      event.preventDefault();
+      const button = event.target.closest('.tab-button');
+      const container = button.closest('.endpoint-card');
+
+      // Hide all tabs in this container
+      container.querySelectorAll('[id^="req"], [id^="res"]').forEach(el => {
+        el.classList.add('hidden');
+      });
+
+      // Show selected tab
+      document.getElementById(tabId).classList.remove('hidden');
+
+      // Update button styles
+      container.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      button.classList.add('active');
+    }
+
+    async function testCreateOrder() {
+      const responseCode = document.getElementById('createOrderResponseCode');
+      const baseUrl = 'https://unique-motors.onrender.com';
+      const url = `${baseUrl}/api/orders`;
+
+      try {
+        // Show loading state
+        responseCode.textContent = 'Cargando...';
+        responseCode.className = 'text-yellow-400';
+
+        // Switch to response tab
+        const container = document.getElementById('create-order');
+        container.querySelectorAll('[id^="req"], [id^="res"]').forEach(el => {
+          el.classList.add('hidden');
+        });
+        document.getElementById('res1').classList.remove('hidden');
+
+        // Update tab buttons
+        container.querySelectorAll('.tab-button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        const resButtons = container.querySelectorAll('.tab-button');
+        if (resButtons.length > 1) {
+          resButtons[1].classList.add('active');
+        }
+
+        const options = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            amount: 100,
+            currency: 'MXN'
+          })
+        };
+
+        const response = await fetch(url, options);
+        const data = await response.json();
+
+        // Format the response
+        let statusText = `Status: ${response.status} ${response.ok ? 'OK' : 'Error'}\n\n`;
+        let formattedResponse = statusText + JSON.stringify(data, null, 2);
+
+        responseCode.textContent = formattedResponse;
+        responseCode.className = response.ok ? 'text-green-400' : 'text-red-400';
+      } catch (error) {
+        const errorMessage = `Error: ${error.message}\n\nAsegúrate de que el servidor esté corriendo en https://unique-motors.onrender.com`;
+        responseCode.textContent = errorMessage;
+        responseCode.className = 'text-red-400';
+      }
+    }
+
+    async function testHealthCheck() {
+      const responseCode = document.getElementById('healthResponseCode');
+      const baseUrl = 'https://unique-motors.onrender.com';
+      const url = `${baseUrl}/`;
+
+      try {
+        // Show loading state
+        responseCode.textContent = 'Cargando...';
+        responseCode.className = 'text-yellow-400';
+
+        // Switch to response tab
+        const container = document.getElementById('health');
+        container.querySelectorAll('[id^="res"]').forEach(el => {
+          el.classList.add('hidden');
+        });
+        document.getElementById('res4').classList.remove('hidden');
+
+        const options = {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        };
+
+        const response = await fetch(url, options);
+        const data = await response.json();
+
+        // Format the response
+        let statusText = `Status: ${response.status} ${response.ok ? 'OK' : 'Error'}\n\n`;
+        let formattedResponse = statusText + JSON.stringify(data, null, 2);
+
+        responseCode.textContent = formattedResponse;
+        responseCode.className = response.ok ? 'text-green-400' : 'text-red-400';
+      } catch (error) {
+        const errorMessage = `Error: ${error.message}\n\nAsegúrate de que el servidor esté corriendo en https://unique-motors.onrender.com`;
+        responseCode.textContent = errorMessage;
+        responseCode.className = 'text-red-400';
+      }
+    }
+
+    async function captureOrder() {
+      const orderID = document.getElementById('captureOrderID').value.trim();
+      const responseCode = document.getElementById('captureResponseCode');
+
+      if (!orderID) {
+        responseCode.textContent = 'Error: Por favor ingresa un Order ID válido';
+        responseCode.className = 'text-red-400';
+
+        // Switch to response tab
+        const container = document.getElementById('capture-order');
+        container.querySelectorAll('[id^="req"], [id^="res"]').forEach(el => {
+          el.classList.add('hidden');
+        });
+        document.getElementById('res2').classList.remove('hidden');
+
+        // Update tab buttons
+        container.querySelectorAll('.tab-button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        const resButtons = container.querySelectorAll('.tab-button');
+        if (resButtons.length > 1) {
+          resButtons[1].classList.add('active');
+        }
+        return;
+      }
+
+      const baseUrl = 'https://unique-motors.onrender.com';
+      const url = `${baseUrl}/api/orders/${orderID}/capture`;
+
+      try {
+        // Show loading state
+        responseCode.textContent = 'Cargando...';
+        responseCode.className = 'text-yellow-400';
+
+        // Switch to response tab
+        const container = document.getElementById('capture-order');
+        container.querySelectorAll('[id^="req"], [id^="res"]').forEach(el => {
+          el.classList.add('hidden');
+        });
+        document.getElementById('res2').classList.remove('hidden');
+
+        // Update tab buttons
+        container.querySelectorAll('.tab-button').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        const resButtons = container.querySelectorAll('.tab-button');
+        if (resButtons.length > 1) {
+          resButtons[1].classList.add('active');
+        }
+
+        const options = {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        };
+
+        const response = await fetch(url, options);
+        const data = await response.json();
+
+        // Format the response
+        let statusText = `Status: ${response.status} ${response.ok ? 'OK' : 'Error'}\n\n`;
+        let formattedResponse = statusText + JSON.stringify(data, null, 2);
+
+        responseCode.textContent = formattedResponse;
+        responseCode.className = response.ok ? 'text-green-400' : 'text-red-400';
+      } catch (error) {
+        const errorMessage = `Error: ${error.message}\n\nAsegúrate de que el servidor esté corriendo en https://unique-motors.onrender.com`;
+        responseCode.textContent = errorMessage;
+        responseCode.className = 'text-red-400';
+      }
+    }
+
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        // Silent copy - sin alert
+      }).catch(() => {
+        // Silent fail - sin alert
+      });
+    }
+
+    function copiarRespuesta(elementId) {
+      const element = document.getElementById(elementId);
+      const respuesta = element.querySelector('code').textContent;
+
+      if (respuesta && respuesta !== 'Aquí aparecerá el response...' && respuesta !== 'Cargando...') {
+        navigator.clipboard.writeText(respuesta).then(() => {
+          // Show success feedback
+          const btn = event.target.closest('button');
+          const originalText = btn.textContent;
+          const originalHTML = btn.innerHTML;
+          btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i> Copiado!';
+          btn.classList.add('text-green-400');
+          btn.classList.remove('text-zinc-400');
+          lucide.createIcons();
+          setTimeout(() => {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('text-green-400');
+            btn.classList.add('text-zinc-400');
+            lucide.createIcons();
+          }, 2000);
+        }).catch(() => {
+          // Error silencioso
+        });
+      }
+    }
+
+    async function pegarOrderID() {
+      try {
+        const text = await navigator.clipboard.readText();
+        const input = document.getElementById('captureOrderID');
+        input.value = text;
+
+        // Show feedback
+        const btn = event.target.closest('button');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i>';
+        btn.classList.add('text-green-400');
+        btn.classList.remove('text-zinc-400');
+        lucide.createIcons();
+
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.classList.remove('text-green-400');
+          btn.classList.add('text-zinc-400');
+          lucide.createIcons();
+        }, 2000);
+      } catch (err) {
+        // Error silencioso
+      }
+    }
+  </script>
+</body>
+</html>

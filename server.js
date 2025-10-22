@@ -1,8 +1,15 @@
 import 'dotenv/config';
 import http from 'http';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import paypal from '@paypal/checkout-server-sdk';
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
+
+// Obtener __dirname en módulos ES
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 console.log('[INIT] Iniciando servidor PayPal Backend');
 console.log('[INIT] NODE_ENV:', process.env.NODE_ENV);
@@ -524,12 +531,31 @@ const server = http.createServer(async (req, res) => {
     return;
   }
 
+  // ============================================
+  // ENDPOINT: Documentación Swagger (HTML)
+  // ============================================
+  if (req.method === 'GET' && req.url === '/docs') {
+    console.log('[DOCS] Documentation request');
+    try {
+      const docsPath = path.join(__dirname, 'docs.html');
+      const html = fs.readFileSync(docsPath, 'utf-8');
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      res.end(html);
+    } catch (error) {
+      console.error('[DOCS] ERROR reading docs.html:', error.message);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Documentation not available' }));
+    }
+    return;
+  }
+
   if (req.method === 'GET' && req.url === '/') {
     console.log('[HEALTH] Health check request');
     res.writeHead(200, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({
       status: 'ok',
       service: 'PayPal Backend - UniqueMotors',
+      documentation: '/docs',
       endpoints: {
         createOrder: 'POST /api/orders',
         captureOrder: 'POST /api/orders/:orderID/capture',
@@ -552,6 +578,9 @@ server.listen(PORT, () => {
   console.log('========================================');
   console.log('Backend PayPal - UniqueMotors');
   console.log(`Servidor corriendo en puerto ${PORT}`);
+  console.log('========================================');
+  console.log('Documentación:');
+  console.log(`  http://localhost:${PORT}/docs`);
   console.log('========================================');
   console.log('Endpoints disponibles:');
   console.log(`  POST http://localhost:${PORT}/api/orders`);
