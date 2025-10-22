@@ -382,6 +382,9 @@ const server = http.createServer(async (req, res) => {
         console.log('[CAPTURE] Supabase updated successfully');
       }
 
+      // EMAILS DESHABILITADOS - Render bloquea SMTP
+      // Para habilitar, migrar a Railway o usar servicio SMTP alternativo
+      /*
       console.log('[CAPTURE] Iniciando envio de emails...');
       const emailResult = await sendPaymentNotification({
         payer_email: payerEmail,
@@ -411,6 +414,7 @@ const server = http.createServer(async (req, res) => {
           .eq('paypal_order_id', orderID);
         console.log('[CAPTURE] Error de notificacion guardado');
       }
+      */
 
       console.log('[CAPTURE] Enviando respuesta al cliente');
       res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -418,7 +422,7 @@ const server = http.createServer(async (req, res) => {
         success: true,
         order: captureResult,
         paymentRecord: data ? data[0] : null,
-        emailSent: emailResult.success
+        emailSent: false // Emails deshabilitados
       }));
       console.log('[CAPTURE] Proceso completado exitosamente');
 
