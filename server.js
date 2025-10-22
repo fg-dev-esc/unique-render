@@ -48,10 +48,15 @@ console.log('[INIT] Email Pass:', process.env.EMAIL_PASS ? 'SET' : 'MISSING');
 console.log('[INIT] Email Admin:', process.env.EMAIL_ADMIN);
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true, // usar SSL
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: true
   }
 });
 console.log('[INIT] Nodemailer configurado correctamente');
