@@ -138,7 +138,7 @@
       <!-- Content -->
       <div class="max-w-6xl mx-auto p-6 space-y-6">
         <!-- Base URL Info -->
-        <div class="endpoint-card p-6">
+        <div class="endpoint-card p-6" id="baseUrlCard" style="perspective: 1000px;">
           <div class="text-sm text-zinc-400 mb-2">BASE URL</div>
           <div class="flex items-center gap-3">
             <code class="text-zinc-300 font-mono text-sm">https://unique-motors.onrender.com</code>
@@ -495,6 +495,29 @@ Content-Type: application/json
   <script>
     // Initialize Lucide icons
     lucide.createIcons();
+
+    // Tilt effect para Base URL card
+    const baseUrlCard = document.getElementById('baseUrlCard');
+
+    baseUrlCard.addEventListener('mousemove', (e) => {
+      const rect = baseUrlCard.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const rotateX = (y - centerY) / 30;
+      const rotateY = (centerX - x) / 30;
+
+      baseUrlCard.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.01)`;
+    });
+
+    baseUrlCard.addEventListener('mouseleave', () => {
+      baseUrlCard.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+    });
+
+    baseUrlCard.style.transition = 'transform 0.2s ease-out';
 
     function switchTab(event, tabId) {
       event.preventDefault();
