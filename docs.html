@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/framer-motion@11.0.8/dist/framer-motion.min.js"></script>
   <style>
     :root {
       --color-blue: #1447e6;
@@ -152,51 +153,110 @@
     .modal-input::placeholder {
       color: #52525b;
     }
+
+    /* Dock Styles */
+    .dock-container {
+      position: absolute;
+      top: 50%;
+      right: 2rem;
+      transform: translateY(-50%);
+      z-index: 100;
+    }
+
+    .dock {
+      display: flex;
+      height: 58px;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      border-radius: 1rem;
+      border: 1px solid rgba(39, 39, 42, 0.5);
+      padding: 0.5rem;
+      background: rgba(9, 9, 11, 0.8);
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+
+    .dock-icon {
+      display: flex;
+      aspect-ratio: 1;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.75rem;
+      transition: background-color 0.2s;
+      position: relative;
+      padding: 0.4rem;
+    }
+
+    .dock-icon:hover {
+      background-color: rgba(39, 39, 42, 0.5);
+    }
+
+    .dock-icon.active {
+      background-color: var(--color-blue);
+    }
+
+    .dock-icon-label {
+      position: absolute;
+      top: calc(100% + 0.5rem);
+      left: 50%;
+      transform: translateX(-50%) scale(0.8);
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .dock-icon:hover .dock-icon-label {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
   </style>
 </head>
 <body class="min-h-screen bg-black text-white">
   <div class="flex h-screen">
-    <!-- Sidebar -->
-    <div class="w-64 border-r border-zinc-800 bg-zinc-950 overflow-y-auto hidden lg:block">
-      <div class="p-6">
-        <div class="flex items-center gap-2 mb-6">
-          <i data-lucide="package" class="w-5 h-5 text-blue-accent"></i>
-          <h2 class="text-lg font-semibold">PayPal API</h2>
-        </div>
-        <nav class="space-y-1">
-          <a href="#" class="flex items-center gap-3 px-4 py-2 rounded-md text-sm text-zinc-400 hover:text-white hover:bg-zinc-800">
-            <i data-lucide="book-open" class="w-4 h-4"></i>
-            Introducción
-          </a>
-          <a href="#create-order" class="flex items-center gap-3 px-4 py-2 rounded-md text-sm text-zinc-400 hover:text-white hover:bg-zinc-800">
-            <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            Crear Orden
-          </a>
-          <a href="#capture-order" class="flex items-center gap-3 px-4 py-2 rounded-md text-sm text-zinc-400 hover:text-white hover:bg-zinc-800">
-            <i data-lucide="check-circle" class="w-4 h-4"></i>
-            Capturar Orden
-          </a>
-          <a href="#webhook" class="flex items-center gap-3 px-4 py-2 rounded-md text-sm text-zinc-400 hover:text-white hover:bg-zinc-800">
-            <i data-lucide="webhook" class="w-4 h-4"></i>
-            Webhook
-          </a>
-          <a href="#health" class="flex items-center gap-3 px-4 py-2 rounded-md text-sm text-zinc-400 hover:text-white hover:bg-zinc-800">
-            <i data-lucide="heart-handshake" class="w-4 h-4"></i>
-            Health Check
-          </a>
-        </nav>
-      </div>
-    </div>
-
     <!-- Main Content -->
-    <div class="flex-1 overflow-y-auto">
+    <div class="flex-1 overflow-y-auto" id="mainContent">
       <!-- Header -->
       <div class="border-b border-zinc-800 bg-zinc-950 sticky top-0 z-10">
-        <div class="max-w-6xl mx-auto px-6 py-6">
+        <div class="max-w-6xl mx-auto px-6 py-6" style="position: relative;">
           <h1 class="text-3xl font-bold mb-2">PayPal Backend API</h1>
           <p class="text-zinc-400 text-sm">
             Documentación para procesamiento de pagos
           </p>
+
+          <!-- Dock Navigation -->
+          <div class="dock-container">
+            <div class="dock" id="dock">
+              <div class="dock-icon" data-section="top" onclick="scrollToTop()">
+                <span class="dock-icon-label">Introducción</span>
+                <i data-lucide="package" class="w-5 h-5"></i>
+              </div>
+              <div class="dock-icon" data-section="create-order" onclick="scrollToSection('create-order')">
+                <span class="dock-icon-label">Crear Orden</span>
+                <i data-lucide="plus-circle" class="w-5 h-5"></i>
+              </div>
+              <div class="dock-icon" data-section="capture-order" onclick="scrollToSection('capture-order')">
+                <span class="dock-icon-label">Capturar Orden</span>
+                <i data-lucide="check-circle" class="w-5 h-5"></i>
+              </div>
+              <div class="dock-icon" data-section="webhook" onclick="scrollToSection('webhook')">
+                <span class="dock-icon-label">Webhook</span>
+                <i data-lucide="webhook" class="w-5 h-5"></i>
+              </div>
+              <div class="dock-icon" data-section="health" onclick="scrollToSection('health')">
+                <span class="dock-icon-label">Health Check</span>
+                <i data-lucide="heart-handshake" class="w-5 h-5"></i>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -560,6 +620,105 @@ Content-Type: application/json
   <script>
     // Initialize Lucide icons
     lucide.createIcons();
+
+    // Dock magnification effect
+    function initDock() {
+      const dock = document.getElementById('dock');
+      const dockIcons = dock.querySelectorAll('.dock-icon');
+      const DEFAULT_SIZE = 40;
+      const DEFAULT_MAGNIFICATION = 60;
+      const DEFAULT_DISTANCE = 140;
+
+      let mouseX = Infinity;
+
+      dock.addEventListener('mousemove', (e) => {
+        mouseX = e.pageX;
+        updateIconSizes();
+      });
+
+      dock.addEventListener('mouseleave', () => {
+        mouseX = Infinity;
+        updateIconSizes();
+      });
+
+      function updateIconSizes() {
+        dockIcons.forEach((icon) => {
+          const rect = icon.getBoundingClientRect();
+          const iconCenterX = rect.left + rect.width / 2;
+          const distance = Math.abs(mouseX - iconCenterX);
+
+          let scale;
+          if (distance < DEFAULT_DISTANCE) {
+            const scaleFactor = 1 - distance / DEFAULT_DISTANCE;
+            const sizeIncrease = (DEFAULT_MAGNIFICATION - DEFAULT_SIZE) * scaleFactor;
+            const targetSize = DEFAULT_SIZE + sizeIncrease;
+            scale = targetSize / DEFAULT_SIZE;
+          } else {
+            scale = 1;
+          }
+
+          icon.style.transform = `scale(${scale})`;
+          icon.style.transition = 'transform 0.15s cubic-bezier(0.33, 1, 0.68, 1)';
+        });
+      }
+    }
+
+    // Scroll functions
+    function scrollToSection(sectionId) {
+      const section = document.getElementById(sectionId);
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        updateActiveDockIcon(sectionId);
+      }
+    }
+
+    function scrollToTop() {
+      const mainContent = document.getElementById('mainContent');
+      mainContent.scrollTo({ top: 0, behavior: 'smooth' });
+      updateActiveDockIcon('top');
+    }
+
+    function updateActiveDockIcon(sectionId) {
+      const dockIcons = document.querySelectorAll('.dock-icon');
+      dockIcons.forEach(icon => {
+        if (icon.dataset.section === sectionId) {
+          icon.classList.add('active');
+        } else {
+          icon.classList.remove('active');
+        }
+      });
+    }
+
+    // Track active section on scroll
+    function trackActiveSection() {
+      const mainContent = document.getElementById('mainContent');
+      const sections = ['create-order', 'capture-order', 'webhook', 'health'];
+
+      mainContent.addEventListener('scroll', () => {
+        if (mainContent.scrollTop < 100) {
+          updateActiveDockIcon('top');
+          return;
+        }
+
+        for (const sectionId of sections) {
+          const section = document.getElementById(sectionId);
+          if (section) {
+            const rect = section.getBoundingClientRect();
+            if (rect.top <= 200 && rect.bottom >= 200) {
+              updateActiveDockIcon(sectionId);
+              break;
+            }
+          }
+        }
+      });
+    }
+
+    // Initialize on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      initDock();
+      trackActiveSection();
+      updateActiveDockIcon('top');
+    });
 
     // Tilt effect para Base URL card
     const baseUrlCard = document.getElementById('baseUrlCard');
