@@ -1073,14 +1073,14 @@ Content-Type: application/json
 
         // Si el webhook fue recibido, mostrarlo automáticamente en la card de Webhook
         if (response.ok && data.webhookReceived === true) {
-          responseCode.textContent += `\n\n✅ Webhook recibido de PayPal (esperó ${data.waitTime})`;
+          responseCode.textContent += `\n\nWebhook recibido de PayPal (esperó ${data.waitTime})`;
 
           // Mostrar el webhook en la card de Webhook automáticamente
           setTimeout(() => {
             mostrarWebhookReal(data.paymentRecord);
           }, 1000);
         } else if (response.ok && data.webhookReceived === false) {
-          responseCode.textContent += `\n\n⚠️ Webhook no recibido en ${data.waitTime} (timeout)`;
+          responseCode.textContent += `\n\nWebhook no recibido en ${data.waitTime} (timeout)`;
         } else {
         }
       } catch (error) {
