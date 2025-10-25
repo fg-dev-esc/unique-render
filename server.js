@@ -555,6 +555,9 @@ const server = http.createServer(async (req, res) => {
             console.error('[WEBHOOK] ERROR actualizando Supabase:', error);
           } else {
             console.log('[WEBHOOK] Supabase updated successfully');
+            console.log('[WEBHOOK] Verificando condiciones para notificar .NET...');
+            console.log('[WEBHOOK] eventType:', eventType);
+            console.log('[WEBHOOK] existingPayment.user_id:', existingPayment.user_id);
 
             // Notificar al Backend .NET si el pago fue completado exitosamente
             if (eventType === 'PAYMENT.CAPTURE.COMPLETED' && existingPayment.user_id) {
