@@ -796,7 +796,7 @@ Content-Type: application/json
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            amount: 100,
+            amount: 10,
             currency: 'MXN'
           })
         };
@@ -827,8 +827,8 @@ Content-Type: application/json
 
     function abrirPayPal() {
       if (window.currentOrderID) {
-        // Abrir PayPal en nueva ventana
-        window.open(`https://www.sandbox.paypal.com/checkoutnow?token=${window.currentOrderID}`, '_blank');
+        // Abrir PayPal en nueva ventana (PRODUCCIÓN)
+        window.open(`https://www.paypal.com/checkoutnow?token=${window.currentOrderID}`, '_blank');
 
         // Mostrar modal con el Order ID
         setTimeout(() => {

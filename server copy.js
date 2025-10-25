@@ -22,7 +22,7 @@ console.log('[INIT] Configurando PayPal SDK...');
 console.log('[INIT] PayPal Client ID:', process.env.PAYPAL_CLIENT_ID ? 'SET' : 'MISSING');
 console.log('[INIT] PayPal Secret:', process.env.PAYPAL_CLIENT_SECRET ? 'SET' : 'MISSING');
 
-const environment = new paypal.core.LiveEnvironment(
+const environment = new paypal.core.SandboxEnvironment(
   process.env.PAYPAL_CLIENT_ID,
   process.env.PAYPAL_CLIENT_SECRET
 );
