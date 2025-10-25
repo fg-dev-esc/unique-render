@@ -250,8 +250,8 @@ const server = http.createServer(async (req, res) => {
       const body = await getBody(req);
       console.log('[CREATE_ORDER] Body recibido:', JSON.stringify(body));
 
-      const { amount, currency = 'MXN', paymentContext = 'guarantee', torreID, articuloNombre } = body;
-      console.log(`[CREATE_ORDER] Amount: ${amount}, Currency: ${currency}, Context: ${paymentContext}`);
+      const { amount, currency = 'MXN', paymentContext = 'guarantee', torreID, articuloNombre, userId } = body;
+      console.log(`[CREATE_ORDER] Amount: ${amount}, Currency: ${currency}, Context: ${paymentContext}, UserID: ${userId}`);
 
       if (!amount || amount <= 0) {
         console.log('[CREATE_ORDER] ERROR - Monto invalido:', amount);
@@ -298,6 +298,7 @@ const server = http.createServer(async (req, res) => {
         payment_context: paymentContext,
         torre_id: torreID || null,
         articulo_nombre: articuloNombre || null,
+        user_id: userId || null,
         paypal_response: order.result
       };
       console.log('[CREATE_ORDER] Data to insert:', JSON.stringify(insertData, null, 2));
@@ -425,7 +426,7 @@ const server = http.createServer(async (req, res) => {
       console.log('[CAPTURE] Esperando webhook de PayPal...');
       let webhookReceived = false;
       let attempts = 0;
-      const maxAttempts = 30; // 30 intentos de 1 segundo = 30 segundos máximo
+      const maxAttempts = 45; // 30 intentos de 1 segundo = 30 segundos máximo
 
       while (!webhookReceived && attempts < maxAttempts) {
         await new Promise(resolve => setTimeout(resolve, 1000)); // Esperar 1 segundo
@@ -554,6 +555,42 @@ const server = http.createServer(async (req, res) => {
             console.error('[WEBHOOK] ERROR actualizando Supabase:', error);
           } else {
             console.log('[WEBHOOK] Supabase updated successfully');
+
+            // Notificar al Backend .NET si el pago fue completado exitosamente
+            if (eventType === 'PAYMENT.CAPTURE.COMPLETED' && existingPayment.user_id) {
+              console.log('[WEBHOOK] Notificando al Backend .NET...');
+              try {
+                const dotnetPayload = {
+                  UsuarioID: existingPayment.user_id,
+                  Monto: existingPayment.amount,
+                  Authorizacion: orderID,
+                  paymentContext: existingPayment.payment_context || 'garantia'
+                };
+
+                console.log('[WEBHOOK] Payload para .NET:', JSON.stringify(dotnetPayload, null, 2));
+
+                const dotnetResponse = await fetch('https://dev-backend.uniquemotors.mx/api/Pagos/PostDesdePPWebhook', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(dotnetPayload)
+                });
+
+                if (dotnetResponse.ok) {
+                  console.log('[WEBHOOK] Backend .NET notificado exitosamente');
+                  const dotnetResult = await dotnetResponse.json();
+                  console.log('[WEBHOOK] Respuesta del Backend .NET:', JSON.stringify(dotnetResult, null, 2));
+                } else {
+                  console.error('[WEBHOOK] ERROR al notificar Backend .NET - Status:', dotnetResponse.status);
+                  const errorText = await dotnetResponse.text();
+                  console.error('[WEBHOOK] ERROR Response:', errorText);
+                }
+              } catch (notifyError) {
+                console.error('[WEBHOOK] ERROR al notificar Backend .NET:', notifyError.message);
+                console.error('[WEBHOOK] ERROR stack:', notifyError.stack);
+              }
+            }
           }
         } else {
           console.log('[WEBHOOK] WARNING - Payment not found in DB');
